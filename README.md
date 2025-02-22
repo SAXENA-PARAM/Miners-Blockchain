@@ -7,7 +7,7 @@ Members:
 <br>
 - [Param Saxena(230001060)](https://github.com/SAXENA-PARAM)
 - [Saumya Vaidya(230008035)](https://github.com/pohrselvan)
-- [Jagrit(230051005)](https://github.com/Swarangi-codes)
+- [Jagrit(230051005)](https://github.com/idJagrit)
 
 # Our Solution Approach:
 - Use Javascript with sockets and threading for handling multiple connections. 
@@ -32,7 +32,7 @@ This implementation is in Node.js, using:
 
 ##  1. Initializing the Server and User Details:
 At the start, the program asks the user for a name and a port number, which is used to create a server for listening to messages.
-```bash
+```javascript
 rl.question('Enter your name: ', name => {
     myName = name;
     rl.question('Enter your port number: ', port => {
@@ -55,7 +55,7 @@ The code contains several functions, each handling a specific feature:
 
 ## 3. Setting Up a Server:
 Each user starts a TCP server using Node.js' net module, listening for messages from other peers.
-```bash
+```javascript
 function startServer(port) {
     const server = net.createServer(socket => {
         socket.on('data', data => {
@@ -97,7 +97,7 @@ function startServer(port) {
 
 ## 4. Sending a Message to Another Peer:
 Users can send messages by providing the recipient’s IP address and port.
-```bash
+```javascript
 function sendMessage() {
     rl.question('Enter recipient IP: ', ip => {
         rl.question('Enter recipient port: ', port => {
@@ -114,6 +114,7 @@ function sendMessage() {
     });
 }
 ```
+
 ### How it Works:
 - Prompts the user for the recipient's IP, port, and message.
 - Creates a TCP client that connects to the specified recipient.
@@ -122,7 +123,7 @@ function sendMessage() {
 
 ## 5. Querying Active Peers:
 Displays all peers currently connected.
-```bash
+```javascript
 function queryPeers() {
     if (peers.size === 0) {
         console.log('No connected peers.');
@@ -136,7 +137,7 @@ function queryPeers() {
 
 ## 6. Connecting to Known Peers:
 Automatically connects to all peers stored in the peers set.
-```bash
+```javascript
 function connectToPeers() {
     if (peers.size === 0) {
         console.log('No known peers to connect to.');
@@ -160,7 +161,7 @@ function connectToPeers() {
 
 ## 7. Discovering Other Peers:
 Sends a "Who is online?" message to all known peers to check their availability.
-```bash
+```javascript
 function discoverPeers() {
     peers.forEach((name, peer) => {
         const [ip, port] = peer.split(':');
@@ -178,7 +179,7 @@ function discoverPeers() {
 
 ## 8. Getting the Local IP Address:
 Retrieves the IPv4 address of the system.
-```bash
+```javascript
 function getMyIP() {
     const { networkInterfaces } = require('os');
     const nets = networkInterfaces();
@@ -195,7 +196,7 @@ function getMyIP() {
 
 ## 9. Displaying the User Menu:
 A menu-driven interface allows users to interact with the application.
-```bash
+```javascript
 function showMenu() {
     console.log('\n***** Menu *****');
     console.log('1. Send message');
