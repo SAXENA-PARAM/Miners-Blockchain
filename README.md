@@ -288,7 +288,7 @@ Exiting...
 ```
 
 Kindly refer to the [assets folder](assets), for all implememted examples and their results.
-P2P messaging done between **`Port 1`**,**`Port 2`**,**`Port 3`**and **`Port 4`** refer to these terminal snapshots.
+P2P messaging done between **`Port 1`**,**`Port 2`**,`Port 3` and `Port 4` refer to these terminal snapshots.
 - [Port 1 Terminal A](assets/Port1TerminalA.png)
 - [Port 1 Terminal B](assets/Port1TerminalB.png)
 - [Port 2 Terminal](assets/Port2Terminal.png)
