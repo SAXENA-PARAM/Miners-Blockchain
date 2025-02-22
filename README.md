@@ -14,13 +14,13 @@ Members:
 - Implement a server-client hybrid model, where each peer can act as both a sender and a receiver. 
 - Ensure messages are formatted correctly ("<IP:PORT> <team_name> <message_to_be_sent>").
 - Maintain a peer list based on received messages and allow querying of active peers.
-- Handle connection persistence, avoid duplicate entries, and implement a connectToPeers() function for additional networking.
+- Handle connection persistence, avoid duplicate entries, and implement a connect() function for additional networking.
 - Implement multithreading to allow simultaneous communication.
 
 ### Prerequisities:
 - Basics of Socket Programming.
 - Basics of a Programming Language(here, Javascript).
-- Javascript(or any preferrable language) Networking Basics, WebSockets (ws or native WebSocket API) – Enables real-time bidirectional communication, WebRTC –Facilitates peer-to-peer (P2P) communication without a central server, TCP/UDP Sockets (Node.js net module for TCP connections if using a server).
+- Javascript(or any preferrable language) Networking Basics, TCP/UDP Sockets (Node.js net module for TCP connections if using a server).
 
 # Code Overview :
 
@@ -220,6 +220,7 @@ function showMenu() {
     });
 }
 ```
+
 # Implementation:
 - Step 1: Start a peer by running:
   ```bash
