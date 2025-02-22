@@ -4,8 +4,8 @@ const readline = require('readline');
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 let peers = new Map(); 
+let connectionRequests = new Map(); 
 let myName, myPort;
-
 
 function startServer(port) {
     const server = net.createServer(socket => {
@@ -18,13 +18,28 @@ function startServer(port) {
                 peers.delete(peerInfo);
                 console.log(`Peer ${peerInfo} disconnected.`);
                 socket.end();
+            } else if (peerMessage === 'CONNECT_REQUEST') {
+                if (!connectionRequests.has(peerInfo)) {
+                    connectionRequests.set(peerInfo, peerName);
+                    console.log(`Connection request received from ${peerInfo} (${peerName}).`);
+                }
+            } else if (peerMessage === 'CONNECT_ACCEPTED') {
+                peers.set(peerInfo, peerName);
+                connectionRequests.delete(peerInfo);
+                console.log(`Connection accepted with ${peerInfo} (${peerName}).`);
+            } else if (peerMessage === 'DISCONNECT') {
+                peers.delete(peerInfo);
+                console.log(`Peer ${peerInfo} (${peerName}) disconnected.`);
+                socket.write(`${getMyIP()}:${myPort} ${myName} DISCONNECT_ACK`);
+            } else if (peerMessage === 'DISCONNECT_ACK') {
+                console.log(`Peer ${peerInfo} acknowledged disconnection.`);
+                peers.delete(peerInfo);
             } else {
                 peers.set(peerInfo, peerName);
                 console.log(`\nReceived from ${peerInfo} (${peerName}): ${peerMessage}`);
             }
             showMenu();
         });
-   
         socket.on('error', err => {
             if (err.code === 'ECONNRESET') {
                 console.log('A peer unexpectedly disconnected.');
@@ -33,8 +48,6 @@ function startServer(port) {
             }
         });
     });
-
-    
 
     server.listen(port, () => {
         console.log(`Server listening on port ${port}`);
@@ -58,6 +71,55 @@ function sendMessage() {
     });
 }
 
+function connect(peerIP, peerPort) {
+    const peerKey = `${peerIP}:${peerPort}`;
+    if (connectionRequests.has(peerKey)) {
+        console.log('Connection request already pending for this peer.');
+        return;
+    }
+    const client = new net.Socket();
+    client.connect(peerPort, peerIP, () => {
+        const connectionMessage = `${getMyIP()}:${myPort} ${myName} CONNECT_REQUEST`;
+        client.write(connectionMessage);
+        console.log(`Sent connection request to ${peerIP}:${peerPort}`);
+        client.end();
+    });
+}
+
+function acceptConnection(peerIP, peerPort) {
+    const peerKey = `${peerIP}:${peerPort}`;
+    if (connectionRequests.has(peerKey)) {
+        const peerName = connectionRequests.get(peerKey);
+        peers.set(peerKey, peerName);
+        connectionRequests.delete(peerKey);
+
+        const client = new net.Socket();
+        client.connect(peerPort, peerIP, () => {
+            const acceptanceMessage = `${getMyIP()}:${myPort} ${myName} CONNECT_ACCEPTED`;
+            client.write(acceptanceMessage);
+            console.log(`Accepted connection with ${peerIP}:${peerPort}`);
+            client.end();
+        });
+    } else {
+        console.log('No connection request from this peer.');
+    }
+}
+
+function disconnect(peerIP, peerPort) {
+    const peerKey = `${peerIP}:${peerPort}`;
+    if (peers.has(peerKey)) {
+        const client = new net.Socket();
+        client.connect(peerPort, peerIP, () => {
+            const disconnectMessage = `${getMyIP()}:${myPort} ${myName} DISCONNECT`;
+            client.write(disconnectMessage);
+            console.log(`Sent disconnection request to ${peerIP}:${peerPort}`);
+            client.end();
+        });
+        peers.delete(peerKey);
+    } else {
+        console.log('Peer not connected.');
+    }
+}
 
 function queryPeers() {
     if (peers.size === 0) {
@@ -69,40 +131,15 @@ function queryPeers() {
     showMenu();
 }
 
-function connectToPeers() {
-    if (peers.size === 0) {
-        console.log('No known peers to connect to.');
-        showMenu();
-        return;
+function queryPendingRequests() {
+    if (connectionRequests.size === 0) {
+        console.log('No pending connection requests.');
+    } else {
+        console.log('Pending Connection Requests:');
+        connectionRequests.forEach((name, peer) => console.log(`${peer} (${name})`));
     }
-    
-    peers.forEach((name, peer) => {
-        const [ip, port] = peer.split(':');
-        const client = new net.Socket();
-        client.connect(port, ip, () => {
-            const connectionMessage = `${getMyIP()}:${myPort} ${myName} CONNECTION_ESTABLISHED`;
-            client.write(connectionMessage);
-            client.end();
-        });
-    });
-    console.log('Connected to known peers.');
     showMenu();
 }
-
-function discoverPeers() {
-    peers.forEach((name, peer) => {
-        const [ip, port] = peer.split(':');
-        const client = new net.Socket();
-        client.connect(port, ip, () => {
-            const discoveryMessage = `${getMyIP()}:${myPort} ${myName} WHO_IS_ONLINE`;
-            client.write(discoveryMessage);
-            client.end();
-        });
-    });
-    console.log('Broadcasting "Who is online?" message.');
-    showMenu();
-}
-
 
 function getMyIP() {
     const { networkInterfaces } = require('os');
@@ -121,14 +158,39 @@ function showMenu() {
     console.log('\n***** Menu *****');
     console.log('1. Send message');
     console.log('2. Query active peers');
-    console.log('3. Connect to active peers');
-    console.log('4. Discover active peers');
+    console.log('3. Connect to a peer');
+    console.log('4. Accept a connection request');
+    console.log('5. Disconnect from a peer');
+    console.log('6. Query pending connection requests');
     console.log('0. Quit');
     rl.question('Enter choice: ', choice => {
         if (choice === '1') sendMessage();
         else if (choice === '2') queryPeers();
-        else if (choice === '3') connectToPeers();
-        else if (choice === '4') discoverPeers();
+        else if (choice === '3') {
+            rl.question('Enter peer IP: ', ip => {
+                rl.question('Enter peer port: ', port => {
+                    connect(ip, port);
+                    showMenu();
+                });
+            });
+        }
+        else if (choice === '4') {
+            rl.question('Enter peer IP: ', ip => {
+                rl.question('Enter peer port: ', port => {
+                    acceptConnection(ip, port);
+                    showMenu();
+                });
+            });
+        }
+        else if (choice === '5') {
+            rl.question('Enter peer IP: ', ip => {
+                rl.question('Enter peer port: ', port => {
+                    disconnect(ip, port);
+                    showMenu();
+                });
+            });
+        }
+        else if (choice === '6') queryPendingRequests();
         else if (choice === '0') {
             console.log('Exiting...');
             rl.close();
@@ -139,7 +201,6 @@ function showMenu() {
         }
     });
 }
-
 
 rl.question('Enter your name: ', name => {
     myName = name;
