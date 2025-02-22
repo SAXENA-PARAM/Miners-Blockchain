@@ -285,6 +285,9 @@ Peer 1 disconnected.
 ```bash
 Exiting...
 ```
+Kindly refer to the assets folder, for all implememted examples and their results.
+
+And here is the message sent to this set : IP: 10.206.5.228 & PORT: 6555
 
 ## Edge Cases Handled:
 - If a peer disconnects, the system updates the peer list.
