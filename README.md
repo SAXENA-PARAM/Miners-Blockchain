@@ -351,7 +351,7 @@ P2P messaging done between **`Port 1`**,**`Port 2`**,`Port 3` and `Port 4` refer
 - [Port 1 Terminal B](assets/Port1TerminalB.png)
 - [Port 2 Terminal](assets/Port2Terminal.png)
 - [Port 3 Terminal](assets/Port3Terminal.png)
-- [Port 4 Terminal](assets/Port4TerminalA.png) <br>
+- [Port 4 Terminal](assets/Port4Terminal.png) <br>
 **For **`Port 1`** connecting done in the implementation of connect() function, refer to the [Port 1 Connect](assets/Port1Connect.png).<br>
 For **`Port 2`** connecting done in the implementation of connect() function, refer to the [Port 2 Connect](assets/Port2Connect.png).<br>
 For **`Port 1`** disconnecting done in the implementation of disconnect() function, refer to the [Port 1 Disconnect](assets/Port1Disconnect.png).<br>
