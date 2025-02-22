@@ -5,8 +5,8 @@ To implement a peer-to-peer chat program in a language of your choice that enabl
 
 Members:
 <br>
-- [Param Saxena(23000160)](https://github.com/user-230087)
-- [Saumya Vaidya()](https://github.com/pohrselvan)
+- [Param Saxena(230001060)]([https://github.com/user-230087](https://github.com/SAXENA-PARAM))
+- [Saumya Vaidya(230008035)](https://github.com/pohrselvan)
 - [Jagrit(230051005)](https://github.com/Swarangi-codes)
 
 # Our Solution Approach:
@@ -222,7 +222,8 @@ function showMenu() {
 # Implementation:
 - Step 1: Start a peer by running:
   ```bash
-  node peer.js
+  npm i
+  node index.js
   ```
 - Step 2: Enter the required details (name, port).
 - Step 3: Use the menu to send messages or query peers.
