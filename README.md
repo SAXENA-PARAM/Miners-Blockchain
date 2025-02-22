@@ -286,10 +286,19 @@ Peer 1 disconnected.
 ```bash
 Exiting...
 ```
-Kindly refer to the [assets folder](assets), for all implememted examples and their results.
 
-And here is the message sent to this set : IP: 10.206.5.228 & PORT: 6555 (Also present in the assets folder). 
-<br>
+Kindly refer to the [assets folder](assets), for all implememted examples and their results.
+P2P messaging done between **`Port 1`**,**`Port 2`**,**`Port 3`**and **`Port 4`** refer to these terminal snapshots.
+- [Port 1 Terminal A](assets/Port1TerminalA.png)
+- [Port 1 Terminal B](assets/Port1TerminalB.png)
+- [Port 2 Terminal](assets/Port2Terminal.png)
+- [Port 3 Terminal](assets/Port3Terminal.png)
+- [Port 4 Terminal](assets/Port4TerminalA.png)
+**For **`Port 1`** connecting done in the implementation of connect() function, refer to the [Port 1 Connect](assets/Port1Connect.png).
+For **`Port 2`** connecting done in the implementation of connect() function, refer to the [Port 2 Connect](assets/Port2Connect.png).
+For **`Port 1`** disconnecting done in the implementation of disconnect() function, refer to the [Port 1 Disconnect](assets/Port1Disconnect.png).
+For **`Port 2`** disconnecting done in the implementation of disconnect() function, refer to the [Port 1 Disconnect](assets/Port1Connect.png).
+And here is the message sent to this set : IP: 10.206.5.228 & PORT: 6555 (Also present in the assets folder).**
 <img width="1231" alt="Screenshot 2025-02-20 at 11 00 18 PM" src="https://github.com/user-attachments/assets/02bad72c-6ddd-4715-944a-2695dee4af08" />
 
 ## Edge Cases Handled:
