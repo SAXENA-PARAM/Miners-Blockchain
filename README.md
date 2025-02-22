@@ -12,7 +12,7 @@ Members:
 # Our Solution Approach:
 - Use Javascript with sockets and threading for handling multiple connections. 
 - Implement a server-client hybrid model, where each peer can act as both a sender and a receiver. 
-- Ensure messages are formatted correctly ("<IP:PORT> <team_name> <message>").
+- Ensure messages are formatted correctly ("<IP:PORT> <team_name> <message_to_be_sent>").
 - Maintain a peer list based on received messages and allow querying of active peers.
 - Handle connection persistence, avoid duplicate entries, and implement a connectToPeers() function for additional networking.
 - Implement multithreading to allow simultaneous communication.
