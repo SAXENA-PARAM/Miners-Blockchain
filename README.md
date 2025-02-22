@@ -285,9 +285,10 @@ Peer 1 disconnected.
 ```bash
 Exiting...
 ```
-Kindly refer to the assets folder, for all implememted examples and their results.
+Kindly refer to the [assets folder](assets), for all implememted examples and their results.
 
-And here is the message sent to this set : IP: 10.206.5.228 & PORT: 6555
+And here is the message sent to this set : IP: 10.206.5.228 & PORT: 6555 (Also present in the assets folder). <br>
+<img width="1231" alt="Screenshot 2025-02-20 at 11 00 18 PM" src="https://github.com/user-attachments/assets/02bad72c-6ddd-4715-944a-2695dee4af08" />
 
 ## Edge Cases Handled:
 - If a peer disconnects, the system updates the peer list.
