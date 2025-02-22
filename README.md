@@ -14,7 +14,7 @@ Members:
 - Implement a server-client hybrid model, where each peer can act as both a sender and a receiver. 
 - Ensure messages are formatted correctly ("<IP:PORT> <team_name> <message_to_be_sent>").
 - Maintain a peer list based on received messages and allow querying of active peers.
-- Handle connection persistence, avoid duplicate entries, and implement a connect() function for additional networking. (Bonus Task)
+- Handle connection persistence, avoid duplicate entries, and implement a connect() function for additional networking.
 - Implement multithreading to allow simultaneous communication.
 
 ### Prerequisities:
@@ -43,37 +43,25 @@ rl.question('Enter your name: ', name => {
 ```
 ## 2. Functions in the Code:
 The code contains several functions, each handling a specific feature:
-| Function Name       | Purpose |
-|---------------------|---------|
-| `startServer(port)` | Creates a server that listens for incoming messages. |
-| `sendMessage()`     | Sends a message to a specified peer (IP & port). |
-| `queryPeers()`      | Displays a list of currently connected peers. |
-| `connectToPeers()`  | Establishes connections with known peers. |
-| `discoverPeers()`   | Sends a broadcast to check which peers are online. |
-| `getMyIP()`        | Retrieves the system’s local IP address. |
-| `showMenu()`        | Displays a menu with options to interact with the chat system. |
+
+| Function Name          | Purpose |
+|------------------------|---------|
+| `startServer(port)`    | Creates a server that listens for incoming messages and connection requests. |
+| `sendMessage()`        | Sends a message to a specified peer (IP & port). |
+| `connect(peerIP, peerPort)` | Sends a connection request to a peer. |
+| `acceptConnection(peerIP, peerPort)` | Accepts a pending connection request from a peer. |
+| `disconnect(peerIP, peerPort)` | Disconnects from a connected peer. |
+| `queryPeers()`         | Displays a list of currently connected peers. |
+| `queryPendingRequests()` | Displays all pending connection requests. |
+| `getMyIP()`           | Retrieves the system’s local IP address. |
+| `showMenu()`          | Displays a menu with options to interact with the peer-to-peer network. |
+
 
 ## 3. Setting Up a Server:
 Each user starts a TCP server using Node.js' net module, listening for messages from other peers.
 ```javascript
 function startServer(port) {
     const server = net.createServer(socket => {
-        socket.on('data', data => {
-            const message = data.toString().trim();
-            const [peerInfo, peerName, ...msgParts] = message.split(' ');
-            const peerMessage = msgParts.join(' ');
-
-            if (peerMessage === 'exit') {
-                peers.delete(peerInfo);
-                console.log(`Peer ${peerInfo} disconnected.`);
-                socket.end();
-            } else {
-                peers.set(peerInfo, peerName);
-                console.log(`\nReceived from ${peerInfo} (${peerName}): ${peerMessage}`);
-            }
-            showMenu();
-        });
-
         socket.on('error', err => {
             if (err.code === 'ECONNRESET') {
                 console.log('A peer unexpectedly disconnected.');
@@ -135,46 +123,91 @@ function queryPeers() {
 }
 ```
 
-## 6. Connecting to Known Peers:
-Automatically connects to all peers stored in the peers set.
+## 6. Connect(BONUS QUESTION):
+Sends the connection request to the peer using option 3 in the Menu
 ```javascript
-function connectToPeers() {
-    if (peers.size === 0) {
-        console.log('No known peers to connect to.');
-        showMenu();
+function connect(peerIP, peerPort) {
+    const peerKey = `${peerIP}:${peerPort}`;
+    if (connectionRequests.has(peerKey)) {
+        console.log('Connection request already pending for this peer.');
         return;
     }
-    
-    peers.forEach((name, peer) => {
-        const [ip, port] = peer.split(':');
-        const client = new net.Socket();
-        client.connect(port, ip, () => {
-            const connectionMessage = `${getMyIP()}:${myPort} ${myName} CONNECTION_ESTABLISHED`;
-            client.write(connectionMessage);
-            client.end();
-        });
+    const client = new net.Socket();
+    client.connect(peerPort, peerIP, () => {
+        const connectionMessage = `${getMyIP()}:${myPort} ${myName} CONNECT_REQUEST`;
+        client.write(connectionMessage);
+        console.log(`Sent connection request to ${peerIP}:${peerPort}`);
+        client.end();
     });
-    console.log('Connected to known peers.');
-    showMenu();
 }
 ```
-
-## 7. Discovering Other Peers:
-Sends a "Who is online?" message to all known peers to check their availability.
+The above code calls the below part of the code and store the peer in pending state tat the reciever's end
 ```javascript
-function discoverPeers() {
-    peers.forEach((name, peer) => {
-        const [ip, port] = peer.split(':');
+(peerMessage === 'CONNECT_REQUEST') {
+                if (!connectionRequests.has(peerInfo)) {
+                    connectionRequests.set(peerInfo, peerName);
+                    console.log(`Connection request received from ${peerInfo} (${peerName}).`);
+                }
+            }
+```            
+On the other end this request is in pending state which when accepted using option 4 both of them are included in there peers
+```javascript
+function acceptConnection(peerIP, peerPort) {
+    const peerKey = `${peerIP}:${peerPort}`;
+    if (connectionRequests.has(peerKey)) {
+        const peerName = connectionRequests.get(peerKey);
+        peers.set(peerKey, peerName);
+        connectionRequests.delete(peerKey);
+
         const client = new net.Socket();
-        client.connect(port, ip, () => {
-            const discoveryMessage = `${getMyIP()}:${myPort} ${myName} WHO_IS_ONLINE`;
-            client.write(discoveryMessage);
+        client.connect(peerPort, peerIP, () => {
+            const acceptanceMessage = `${getMyIP()}:${myPort} ${myName} CONNECT_ACCEPTED`;
+            client.write(acceptanceMessage);
+            console.log(`Accepted connection with ${peerIP}:${peerPort}`);
             client.end();
         });
-    });
-    console.log('Broadcasting "Who is online?" message.');
-    showMenu();
+    } else {
+        console.log('No connection request from this peer.');
+    }
 }
+```
+Once the accepted formatted message is sent then the below part of the code is used which removed the pending state and adds to the peer list
+```javascript
+(peerMessage === 'CONNECT_ACCEPTED') {
+                peers.set(peerInfo, peerName);
+                connectionRequests.delete(peerInfo);
+                console.log(`Connection accepted with ${peerInfo} (${peerName}).`);}
+```                
+
+## 7. Disconnect(BONUS QUESTION):
+When anybody send disconnect using option 5 in the Menu both the peers are removed from each other's peers
+```javascript
+function disconnect(peerIP, peerPort) {
+    const peerKey = `${peerIP}:${peerPort}`;
+    if (peers.has(peerKey)) {
+        const client = new net.Socket();
+        client.connect(peerPort, peerIP, () => {
+            const disconnectMessage = `${getMyIP()}:${myPort} ${myName} DISCONNECT`;
+            client.write(disconnectMessage);
+            console.log(`Sent disconnection request to ${peerIP}:${peerPort}`);
+            client.end();
+        });
+        peers.delete(peerKey);
+    } else {
+        console.log('Peer not connected.');
+    }
+}
+```
+The above code then send the message under the formatted pattern which then call the below 
+```javascript
+ else if (peerMessage === 'DISCONNECT') {
+                peers.delete(peerInfo);
+                console.log(`Peer ${peerInfo} (${peerName}) disconnected.`);
+                socket.write(`${getMyIP()}:${myPort} ${myName} DISCONNECT_ACK`);
+            } else if (peerMessage === 'DISCONNECT_ACK') {
+                console.log(`Peer ${peerInfo} acknowledged disconnection.`);
+                peers.delete(peerInfo);
+            } 
 ```
 
 ## 8. Getting the Local IP Address:
@@ -201,14 +234,39 @@ function showMenu() {
     console.log('\n***** Menu *****');
     console.log('1. Send message');
     console.log('2. Query active peers');
-    console.log('3. Connect to active peers');
-    console.log('4. Discover active peers');
+    console.log('3. Connect to a peer');
+    console.log('4. Accept a connection request');
+    console.log('5. Disconnect from a peer');
+    console.log('6. Query pending connection requests');
     console.log('0. Quit');
     rl.question('Enter choice: ', choice => {
         if (choice === '1') sendMessage();
         else if (choice === '2') queryPeers();
-        else if (choice === '3') connectToPeers();
-        else if (choice === '4') discoverPeers();
+        else if (choice === '3') {
+            rl.question('Enter peer IP: ', ip => {
+                rl.question('Enter peer port: ', port => {
+                    connect(ip, port);
+                    showMenu();
+                });
+            });
+        }
+        else if (choice === '4') {
+            rl.question('Enter peer IP: ', ip => {
+                rl.question('Enter peer port: ', port => {
+                    acceptConnection(ip, port);
+                    showMenu();
+                });
+            });
+        }
+        else if (choice === '5') {
+            rl.question('Enter peer IP: ', ip => {
+                rl.question('Enter peer port: ', port => {
+                    disconnect(ip, port);
+                    showMenu();
+                });
+            });
+        }
+        else if (choice === '6') queryPendingRequests();
         else if (choice === '0') {
             console.log('Exiting...');
             rl.close();
