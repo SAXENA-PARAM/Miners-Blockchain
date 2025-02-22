@@ -6,7 +6,7 @@ To implement a peer-to-peer chat program in a language of your choice that enabl
 Members:
 <br>
 - [Param Saxena(230001060)](https://github.com/SAXENA-PARAM)
-- [Saumya Vaidya(230008035)](https://github.com/pohrselvan)
+- [Saumya Vaidya(230008035)](https://github.com/samthedoctor)
 - [Jagrit(230051005)](https://github.com/idJagrit)
 
 # Our Solution Approach:
